@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>错误</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-flow: column wrap;
+      justify-content: flex-start;
+      align-items: center;
+      background-color: #ffffff;
+    }
+    .error_img {
+      width: 100px;
+      height: 100px; 
+      margin: 42px 0 20px;
+      box-sizing: border-box;
+      border-radius: 50%;
+      background-color: rgb(240, 15, 15);
+      color: white;
+      font-size: 62px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .error_message {
+      display: flex;
+      flex-flow: column wrap;
+      align-items: center;
+    }
+    .error_message .message_title {
+      padding: 6px;
+      color: #003;
+      font-size: 16px;
+    }
+    .error_message .message_content {
+      padding: 8px;
+      color: #000;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <section class="error_img">
+    <span class="img_content">!</span>
+  </section>
+  <section class="error_message">
+    <p class="message_title">ERROR</p>
+    <p class="message_content">@{msg}</p>
+  </section>
+</body>
+</html>

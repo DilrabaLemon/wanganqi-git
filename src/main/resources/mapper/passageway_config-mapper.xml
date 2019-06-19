@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.PassagewayConfigDao">
+	<select id="getPassagewayConfigListByPage" resultType="passagewayConfig">
+		select pc.* , pi.passageway_name as mapping_passageway_name, pi.passageway_code as mapping_passageway_code, sui.shop_name
+		from passageway_config pc
+		left join passageway_info pi on pc.mapping_passageway_id = pi.id 
+		left join shop_user_info sui on pc.shop_id = sui.id
+		<where>
+            pc.delete_flag = 0 
+             <if test="passageway_id != null">
+                and pc.passageway_id = #{passageway_id}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and pc.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and pc.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by pc.create_time desc limit #{start}, #{page_size}
+	</select>
+	
+	<select id="getPassagewayConfigListByCount" resultType="int">
+		select count(*)
+		from passageway_config
+		<where>
+            delete_flag = 0 
+            <if test="passageway_id != null">
+                and passageway_id = #{passageway_id}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	</select>
+	
+	<select id="findConfigByPassagewayIdAndMoney" resultType="passagewayConfig">
+		select *
+		from passageway_config
+		<where>
+            delete_flag = 0 and passageway_id = #{passageway_id} and enable = 0 
+            and max_money &gt;= #{money} and min_money &lt;= #{money}
+            and shop_id in (0, #{shop_id})
+            
+        </where>
+	</select>
+	
+</mapper>

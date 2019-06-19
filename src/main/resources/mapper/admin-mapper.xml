@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.AdminDao">
+
+    <sql id="cols">
+        id,admin_name,role_id,login_number,password,delete_flag
+    </sql>
+
+    <select id="adminLogin" resultType="adminInfo">
+        select
+        *
+        from platform_admin_info
+        where delete_flag = 0
+        and login_number = #{login_number}
+        and password = #{password}
+    </select>
+    
+    <select id="getAdminByLoginNumber" resultType="adminInfo">
+        select
+        *
+        from platform_admin_info
+        where delete_flag = 0
+        and login_number = #{login_number}
+    </select>
+    
+    <select id="getTurnoverByCondition" resultType="double">
+        select
+        SUM(money) 
+        from order_info
+        where delete_flag = 0 
+        and create_time &gt; #{time}
+        and order_state=1
+    </select>
+    
+    <select id="getTurnover" resultType="double">
+        select
+        SUM(money) 
+        from order_info
+        where delete_flag = 0 
+        and order_state=1
+    </select>
+    
+    <select id="getTurnoverByLastMonth" resultType="double">
+        select
+        SUM(money) 
+        from order_info
+        where delete_flag = 0 
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and order_state=1
+    </select>
+    
+    <select id="getExtractionByLastMonth" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and state=1
+    </select>
+    
+    <select id="getExtractionByCondition" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{time}
+        and state=1
+    </select>
+    
+    <select id="getExtraction" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0
+        and state=1 
+    </select>
+    
+    <select id="getShopCountByCondition" resultType="int">
+        select
+        COUNT(*) 
+        from shop_user_info
+        where delete_flag = 0 
+        and create_time &gt; #{time}
+    </select>
+    
+    <select id="getShopCount" resultType="int">
+        select
+        COUNT(*) 
+        from shop_user_info
+        where delete_flag = 0 
+    </select>
+    
+    <select id="getAgentCount" resultType="int">
+        select
+        COUNT(*) 
+        from agent_info
+        where delete_flag = 0 
+    </select>
+    
+    <select id="getAgentMoney" resultType="double">
+        select
+        SUM(actual_money) 
+        from agent_account
+        where delete_flag = 0 
+        and type = 1
+        and state = 1
+    </select>
+    
+    <select id="getPlatformPoundage" resultType="double">
+        select
+        SUM(actual_money) 
+        from platform_account
+        where delete_flag = 0 
+        and type = 1
+        and state = 1
+    </select>
+    
+    <select id="getAdminListByCount" resultType="int">
+        select count(*)
+		from platform_admin_info
+		<where>
+            delete_flag = 0
+            <if test="login_number != null and login_number != ''">
+                and login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="admin_name != null and admin_name != ''">
+                and admin_name like concat('%',#{admin_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getAdminListByPage" resultType="adminInfo">
+        select *
+		from platform_admin_info
+		<where>
+            delete_flag = 0
+            <if test="login_number != null and login_number != ''">
+                and login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="admin_name != null and admin_name != ''">
+                and admin_name like concat('%',#{admin_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+
+</mapper>

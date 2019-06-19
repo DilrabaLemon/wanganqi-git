@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.SubstituteDao" >
+
+	<select id="getSubstituteByPassagewayId" resultType="SubstituteAccount">
+        select * from substitute_account where passageway_id = #{passageway_id} and delete_flag=0
+    </select>
+
+	<select id="getSubstituteByAccountNumber" resultType="SubstituteAccount">
+        select * from substitute_account where account_number = #{account_number} and delete_flag=0
+    </select>
+    
+    <select id="getSubstituteAccountListByCount" resultType="int">
+        select count(*)
+		from substitute_account
+		<where>
+            delete_flag = 0
+            <if test="account_number != null and account_number != ''">
+                and account_number like concat('%',#{account_number},'%')
+            </if>
+            <if test="passageway_id != null and passageway_id != ''">
+                and passageway_id = #{passageway_id}
+            </if>
+            <if test="main_condition != null and main_condition != ''">
+                and state = #{main_condition}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getSubstituteAccountListByPage" resultType="substituteAccount">
+        select *
+		from substitute_account
+		<where>
+            delete_flag = 0
+            <if test="account_number != null and account_number != ''">
+                and account_number like concat('%',#{account_number},'%')
+            </if>
+            <if test="passageway_id != null and passageway_id != ''">
+                and passageway_id = #{passageway_id}
+            </if>
+            <if test="main_condition != null and main_condition != ''">
+                and state = #{main_condition}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+</mapper>

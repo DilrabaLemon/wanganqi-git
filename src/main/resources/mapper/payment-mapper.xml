@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.PaymentDao">
+    
+    <select id="getPaymentByAccountNumber" resultType="PaymentAccount">
+        select * from payment_account where account_number = #{account_number} and delete_flag=0
+    </select>
+
+	<select id="getPaymentByCounterNumber" resultType="PaymentAccount">
+        select * from payment_account where counter_number = #{counter_number} and delete_flag=0
+    </select>
+    
+    <select id="getPaymentByPassageway" resultType="PaymentAccount">
+        select * from payment_account where passageway_id = #{passageway_id} and delete_flag=0 and usable_quota &gt;= #{payment} and min_money &lt;= #{payment} and max_money &gt;= #{payment}
+    </select>
+    
+    <select id="getPaymentByPassagewayAndState" resultType="PaymentAccount">
+        select * from payment_account 
+        where passageway_id = #{passageway_id} and delete_flag=0 and state = 0 and usable_quota &gt;= #{payment} and min_money &lt;= #{payment} and max_money &gt;= #{payment}
+    </select>
+    
+    <select id="getPaymentAccountListByCount" resultType="int">
+        select count(*)
+		from payment_account pa
+		LEFT JOIN passageway_info pi on pi.id = pa.passageway_id
+		<where>
+            pa.delete_flag = 0 and pi.passageway_type = #{type}
+             <if test="account_number != null and account_number != ''">
+                and pa.account_number like concat('%',#{account_number},'%')
+            </if>
+            <if test="counter_number != null and counter_number != ''">
+                and pa.counter_number like concat('%',#{counter_number},'%')
+            </if>
+            <if test="passageway_id != null and passageway_id != ''">
+                and pa.passageway_id = #{passageway_id}
+            </if>
+            <if test="main_condition != null and main_condition != ''">
+                and pa.state = #{main_condition}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and pa.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and pa.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getPaymentAccountListByPage" resultType="paymentAccount">
+        select *
+		from payment_account pa
+		LEFT JOIN passageway_info pi on pi.id = pa.passageway_id
+		<where>
+            pa.delete_flag = 0 and pi.passageway_type = #{type}
+            <if test="account_number != null and account_number != ''">
+                and pa.account_number like concat('%',#{account_number},'%')
+            </if>
+            <if test="counter_number != null and counter_number != ''">
+                and pa.counter_number like concat('%',#{counter_number},'%')
+            </if>
+            <if test="passageway_id != null and passageway_id != ''">
+                and pa.passageway_id = #{passageway_id}
+            </if>
+            <if test="main_condition != null and main_condition != ''">
+                and pa.state = #{main_condition}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and pa.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and pa.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by pa.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="findPaymentByPassageway" resultType="PaymentAccount">
+        select * from payment_account where passageway_id = #{passageway_id} and delete_flag=0 and state=0
+    </select>
+    
+    <update id="changePaymentUsableMoney">
+        update payment_account
+        <set>
+        	usable_quota = usable_quota - #{money}
+        </set>
+        where id=#{payment_id}
+	</update>
+	
+	<update id="resetPaymentUsableMoney">
+        update payment_account
+        <set>
+        	usable_quota = #{money}
+        </set>
+        where id=#{payment_id}
+	</update>
+
+	<select id="findPaymentByCounterNumber" resultType="PaymentAccount">
+        select * from payment_account 
+        where counter_number like concat('%',#{counter_number},'%') and delete_flag=0
+    </select>
+
+
+</mapper>

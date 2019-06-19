@@ -1,0 +1,35 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.ShopSubConfigDao">
+     <select id="getShopSubConfigByShopAndPsway" resultType="shopSubConfig">
+        select *
+        from shop_sub_config
+        where delete_flag = 0 and shop_id = #{shop_id} and passageway_id = #{passageway_id}
+    </select>
+    
+    <select id="shopSubConfigListCountNew" resultType="int">
+        select count(*)
+        from shop_sub_config conf
+        LEFT JOIN passageway_info passage ON conf.passageway_id = passage.id
+      	<where>
+      		conf.delete_flag = 0 and passage.delete_flag = 0 and conf.shop_id = #{main_condition} and passage.passageway_type = #{type}
+      		<if test="passageway_name != null and passageway_name != ''">
+                and passage.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+      	</where> 
+    </select>
+    
+    <select id="shopSubConfigListNew" resultType="shopSubConfig">
+        select *
+        from shop_sub_config conf
+        LEFT JOIN passageway_info passage ON conf.passageway_id = passage.id
+        <where>
+      		conf.delete_flag = 0 and passage.delete_flag = 0 and conf.shop_id = #{main_condition} and passage.passageway_type = #{type}
+      		<if test="passageway_name != null and passageway_name != ''">
+                and passage.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+      	</where> 
+		order by conf.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+</mapper>

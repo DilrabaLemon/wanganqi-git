@@ -1,0 +1,12 @@
+package com.boye.api;
+
+public class Config {
+
+//    static String Url = "http://192.168.0.114/payment/";
+//
+//    static String MERCNUM = "M000027";
+//
+//    static String privateKey =
+//        "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAI8nawgypcfAYGosnzd4MTSh3k4qCrCH/6Z67v2Y2KUIwgtpClFipox4NMcrU3hyh9pnz3g+kpi48AednsNNyxvDCkxyP86fM/CR+kw9x3fdiakMmwaUEAODR4TNDn8Q8Yy70IjubrkUqu9nSqPsBGdlyrpyKcqGu4S5pxMpjXljAgMBAAECgYArYXKZ5V8/jRiqlCMbmByxKmxHm43puQzL0m0iBHOCb4j+FDLAPvjhkHvN7184HNz2XocMlUmvZju20xkNbkGiEA5H25JCS8b9uwqNWcxrr+CO34I10+Kq7Mk1lWSkb/Sbnph8jL+DkgPyN6X976/Y0tzPRLo8NrH4ESROWOFtIQJBAMAMD19z/5aHGPXKEWKsbB7F5ilgHWJGQesRG1NQkPFVSL2Boet6T6jxqulqCCHcAIeYmmp0BZJ8Y7l815gDHu8CQQC+0zzlFfsXnHpcnDGE0kY2IAUXSu3cCTEGWE79wsDYZCw77BI0JJ3+RB49HTlJYx+GNjj3PiLIcXfka55YDYzNAkABVVQZ/o0st11l/3QlcjsB76/MY71wfDpi7mh5KJsJAeWSYz8DioLZEmx0WGccDRH33whbatjLDpAGrqY0iPkDAkB3ZpdwxFszf+60aes2L5hNH6Xv2CuTBZFOZg0vDSA7hhqDeAg/5jWRtq+xD8sbl1FPWjg0xAVhpFYfcBNJB1l1AkAlMnrZE2PYX4qJhT7zW8wg1X/dw6UAXQaP+sBKSbFGZxEDS1vbH544PPxpkhXbU7AjfHBh8JCPs7htvX7dfzXV";
+
+}

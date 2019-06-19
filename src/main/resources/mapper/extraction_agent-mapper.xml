@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.ExtractionAgentDao">
+
+    <select id="getExtractionByNumber" resultType="extractionRecordForAgent">
+        select * from agent_extraction_record  where extraction_number = #{extraction_number} and delete_flag = 0
+    </select>
+    
+    <select id="getExtractionRecordAgent" resultType="extractionRecordForAgent">
+		select info.agent_name, record.*
+		from agent_extraction_record record 
+		LEFT JOIN agent_info info ON record.agent_id = info.id 
+		<where>
+            record.delete_flag = 0 and state = #{state}
+            <if test="main_condition != null and main_condition != ''">
+                and record.agent_id = #{main_condition}
+            </if>
+             <if test="agent_name != null and agent_name != ''">
+                and info.agent_name like concat('%',#{agent_name},'%')
+            </if>
+            <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="max_money != null and max_money != ''">
+                and record.extraction_money &lt;= #{max_money}
+            </if>
+            <if test="min_money != null and min_money != ''">
+                and record.extraction_money &gt;= #{min_money}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by record.create_time desc limit #{start}, #{page_size}
+	</select>
+	
+	<select id="getExtractionRecordAgentCount" resultType="int">
+		select count(*)
+		from agent_extraction_record record 
+		LEFT JOIN agent_info info ON record.agent_id = info.id 
+		<where>
+            record.delete_flag = 0
+            <if test="main_condition != null and main_condition != ''">
+                and record.agent_id = #{main_condition}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="agent_name != null and agent_name != ''">
+                and info.agent_name like concat('%',#{agent_name},'%')
+            </if>
+             <if test="max_money != null and max_money != ''">
+                and record.extraction_money &lt;= #{max_money}
+            </if>
+            <if test="min_money != null and min_money != ''">
+                and record.extraction_money &gt;= #{min_money}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	</select>
+	
+	<select id="getExtractionCountByAgentId" resultType="int">
+        select count(*) from agent_extraction_record  where agent_id = #{agent_id} and delete_flag = 0
+    </select>
+</mapper>

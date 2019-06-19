@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.MenuTableDao">
+
+    <select id="getMenuTableById" resultType="MenuTable">
+        select * from menu_table  
+        where id = #{menu_id} and delete_flag = 0
+    </select>
+    
+     <select id="getMenuTableListByRoleId" resultType="MenuTable">
+        select mt.* from menu_table as mt,role_menu as rm
+        where rm.menu_id = mt.id and rm.role_id= #{role_id} and mt.delete_flag = 0 and rm.delete_flag = 0
+        order by mt.id asc
+    </select>
+    
+    <select id="getMenuTableList" resultType="MenuTable">
+        select * from menu_table 
+        where delete_flag = 0
+    </select>
+</mapper>

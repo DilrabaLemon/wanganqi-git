@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.OrderDao">
+
+	<update id="setOrderStateByPlatformOrderNumber" parameterType="orderInfo" timeout="20">
+        update order_info set order_state = #{order_state} where platform_order_number = #{platform_order_number} and delete_flag = 0
+    </update>
+
+	<select id="getOrderByPlatformOrderNumber" resultType="orderInfo">
+        select * from order_info where platform_order_number = #{platform_order_number} and delete_flag = 0
+    </select>
+
+	<select id="getOrderByOrderNumber" resultType="orderInfo">
+        select * from order_info where shop_id = #{shop_id} and order_number = #{order_number} and delete_flag = 0
+    </select>
+	
+	<select id="getShopIdsByAgent" resultType="long">
+        select id from shop_user_info where agent_id = #{agent_id} and delete_flag = 0
+    </select>
+    
+    <select id="getOrderInfoById" resultType="orderAndAccountBo">
+        select info.shop_name, info.login_number as shop_phone, orde.* 
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		where orde.id = #{order_id}
+    </select>
+    
+    <select id="getOrder" resultType="orderInfo">
+		select info.shop_name, orde.* 
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		<where>
+	        orde.delete_flag = 0
+            <if test="shop_ids != null and shop_ids != ''">
+                and orde.shop_id in (#{shop_ids})
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+            <if test="money != null and money != ''">
+                and orde.money = #{money}
+            </if>
+            <if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="counter_number != null and counter_number != ''">
+                and orde.counter_number like concat('%',#{counter_number},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="order_number != null and order_number != ''">
+	            and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	        <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+	        <if test="order_state != null and order_state != ''">
+	            and orde.order_state = #{order_state}
+	        </if>
+        </where>
+		order by orde.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getErrorOrder" resultType="orderInfo">
+		select info.shop_name, info.login_number as shop_phone, orde.*, ifnull(count_table.cut,0) as platform_account_count, 
+			ifnull(roll_table.cut,0) as roll_back_count
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = orde.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=1 group by order_id ) count_table on count_table.order_id=orde.id
+		<where>
+			orde.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) > 1 and orde.order_state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+		order by orde.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+     <select id="getErrorOrderCount" resultType="int">
+    	select count(1)
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = orde.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=1 group by order_id ) count_table on count_table.order_id=orde.id
+		<where>
+	        orde.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) > 1 and orde.order_state = 1
+             <if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="findOrderError" resultType="orderInfo">
+		select info.shop_name, info.login_number as shop_phone, orde.*, ifnull(count_table.cut,0) as platform_account_count, 
+			ifnull(roll_table.cut,0) as roll_back_count
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = orde.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=1 group by order_id ) count_table on count_table.order_id=orde.id
+		<where>
+			orde.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) &lt; 1 and orde.order_state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+		order by orde.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+     <select id="findOrderErrorCount" resultType="int">
+    	select count(1)
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = orde.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=1 group by order_id ) count_table on count_table.order_id=orde.id
+		<where>
+	        orde.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) &lt; 1 and orde.order_state = 1
+             <if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="getOrderCount" resultType="int">
+    	select count(1)
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		<where>
+	        orde.delete_flag = 0
+            <if test="shop_ids != null and shop_ids != ''">
+                and orde.shop_id in (#{shop_ids})
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+            <if test="money != null and money != ''">
+                and orde.money = #{money}
+            </if>
+             <if test="shop_phone != null and shop_id != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="counter_number != null and counter_number != ''">
+                and orde.counter_number like concat('%',#{counter_number},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="order_number != null and order_number != ''">
+	            and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	        <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+	        <if test="order_state != null and order_state != ''">
+	            and orde.order_state = #{order_state}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getShopOrderList" resultType="orderInfo">
+		select info.shop_name, orde.*
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		<where>
+	        orde.delete_flag = 0 
+	        <if test="shop_ids != null">
+                and orde.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+             <if test="money != null and money != ''">
+                and orde.money = #{money}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+             <if test="order_number != null and order_number != ''">
+	           and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	       <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+	        <if test="order_state != null and order_state != ''">
+	            and orde.order_state = #{order_state}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by orde.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+    
+     <select id="orderListStatisticsByShop" resultType="orderInfo">
+		select SUM(orde.money) as money,SUM(orde.shop_income) as shop_income,SUM(orde.platform_income) as platform_income
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		<where>
+	        orde.delete_flag = 0 
+	        <if test="shop_ids != null">
+                and orde.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+             <if test="money != null and money != ''">
+                and orde.money = #{money}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+             <if test="order_number != null and order_number != ''">
+	           and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	       <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+	        <if test="order_state != null and order_state != ''">
+	            and orde.order_state = #{order_state}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getShopOrderListCount" resultType="int">
+    	select count(1)
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		<where>
+	        orde.delete_flag = 0 
+			<if test="shop_ids != null">
+                and orde.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+             <if test="money != null and money != ''">
+                and orde.money = #{money}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+           
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="order_number != null and order_number != ''">
+	           and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	       <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+	        <if test="order_state != null and order_state != ''">
+	            and orde.order_state = #{order_state}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getOrderListByShop" resultType="orderInfo">
+		select info.shop_name, orde.*
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id 
+		LEFT JOIN passageway_info pi ON orde.passageway_id = pi.id
+		<where>
+	        orde.delete_flag = 0 and pi.passageway_type = #{type}
+	        <if test="shop_ids != null">
+                and orde.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="state != null">
+                and orde.order_state =#{state}
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+             <if test="order_number != null and order_number != ''">
+	           and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	       <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by orde.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getOrderListCountByShop" resultType="int">
+    	select count(1)
+		from order_info orde
+		LEFT JOIN shop_user_info info ON orde.shop_id = info.id
+		LEFT JOIN passageway_info pi ON orde.passageway_id = pi.id
+		<where>
+	        orde.delete_flag = 0 and pi.passageway_type = #{type}
+	        <if test="shop_ids != null">
+                and orde.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and orde.shop_id = #{shop_id}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="state != null">
+                and orde.order_state =#{state}
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+           
+            <if test="start_time != null and start_time != ''">
+                and orde.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and orde.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="order_number != null and order_number != ''">
+	           and orde.order_number like concat('%',#{order_number},'%')
+	        </if>
+	       <if test="platform_order_number != null and platform_order_number != ''">
+	            and orde.platform_order_number like concat('%',#{platform_order_number},'%')
+	        </if>
+	        <if test="passageway_id != null and passageway_id != ''">
+	            and orde.passageway_id = #{passageway_id}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getOrderStateByOrderNumber" resultType="orderInfo">
+        select * from order_info where order_number = #{order_number} and delete_flag = 0
+    </select>
+	
+	<select id="getOrderMoneyByPassagewayId" resultType="bigDecimal">
+        select sum(money)  
+        from order_info 
+        where passageway_id = #{passageway_id} and delete_flag = 0 and order_state=1  and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+    <select id="getCompensateOrderStatisticsByAdmin" resultType="bigDecimal">
+        select sum(money)  
+        from order_info 
+        where order_number like '%@%' and delete_flag = 0 and order_state=1  and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+     <select id="getOrderCountByPassagewayId" resultType="BigDecimal">
+        select count(*)  
+        from order_info 
+        where passageway_id =#{passageway_id} and delete_flag = 0 and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+     <select id="getOrderSuccessCountByPassagewayId" resultType="BigDecimal">
+        select count(*)  
+        from order_info 
+        where passageway_id =#{passageway_id} and order_state=1 and delete_flag = 0 and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+    <select id="passagewayCountByShop" resultType="BigDecimal">
+        select count(*)  
+        from order_info 
+        where shop_id = #{shop_id} and passageway_id =#{passageway_id} and delete_flag = 0 and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+    <select id="passagewaySuccessCountByShop" resultType="BigDecimal">
+        select count(*)  
+        from order_info 
+        where shop_id = #{shop_id} and passageway_id =#{passageway_id} and order_state=1 and delete_flag = 0 and create_time &gt;= #{start_time} and create_time &lt;= #{end_time}
+    </select>
+    
+    <select id="getShopNumberByPlatformOrderNumber" resultType="String">
+        select sui.login_number  
+        from order_info oi ,shop_user_info sui 
+        where oi.shop_id = sui.id 
+        	and oi.platform_order_number = #{platform_order_number}
+        	and oi.order_number = #{order_number}
+        	and oi.delete_flag = 0
+    </select>
+    
+    <select id="getFlowStatisticsListByPage" resultType="orderInfo">
+        select oi.passageway_id as passageway_id ,
+        pi.passageway_name as passageway_name,
+        sum(oi.money) as money
+        from order_info oi
+        JOIN passageway_info pi ON oi.passageway_id = pi.id
+        <where>
+        	oi.order_state = 1 and oi.delete_flag = 0
+            <if test="start_time != null and start_time != ''">
+                and oi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and oi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+        group by oi.passageway_id
+        
+    </select>
+    
+    
+    <select id="getFlowStatisticsListByCount" resultType="int">
+    select count(*) from (
+        select oi.passageway_id as passageway_id ,
+        pi.passageway_name as passageway_name,
+        sum(oi.money) as money
+        from order_info oi
+        JOIN passageway_info pi ON oi.passageway_id = pi.id
+        <where>
+        	oi.order_state = 1 and oi.delete_flag = 0
+            <if test="start_time != null and start_time != ''">
+                and oi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and oi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+        group by oi.passageway_id
+     )  a 
+    </select>
+    
+    
+    <select id="getFlowStatisticsCounterByPage" resultType="orderInfo">
+        select oi.counter_number as counter_number,
+        sum(oi.money) as money
+        from order_info oi
+        <where>
+        	oi.order_state = 1 and oi.delete_flag = 0
+            <if test="start_time != null and start_time != ''">
+                and oi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and oi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+        group by oi.counter_number
+        
+    </select>
+    
+    
+    <select id="getFlowStatisticsCounterByCount" resultType="int">
+    select count(*) from (
+        select oi.counter_number as counter_number,
+        sum(oi.money) as money
+        from order_info oi
+        <where>
+        	oi.order_state = 1 and oi.delete_flag = 0
+            <if test="start_time != null and start_time != ''">
+                and oi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and oi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+        group by oi.counter_number
+     )  a 
+    </select>
+    
+    <select id="findSuccessCountByPassagewayId" resultType="int">
+    	select count(*) from order_info oi 
+		where oi.order_state = #{state} and oi.passageway_id = #{passageway_id}
+		<if test="start_time != null and start_time != ''">
+            and oi.create_time &gt;= #{start_time}
+        </if>
+    </select>
+    
+    <select id="findFailCountByPassagewayId" resultType="int">
+    	select count(*) from order_info oi 
+		where oi.order_state &lt;&gt; #{state} and oi.passageway_id = #{passageway_id}
+		<if test="start_time != null and start_time != ''">
+            and oi.create_time &gt;= #{start_time}
+        </if>
+    </select>
+    
+</mapper>

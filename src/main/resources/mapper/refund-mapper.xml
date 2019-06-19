@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.RefundDao">
+
+    <select id="getRefundRecord" resultType="refundRecord">
+		select info.shop_name, orde.order_number, record.*
+		from refund_record record 
+		LEFT JOIN shop_user_info info ON record.shop_id = info.id 
+		LEFT JOIN order_info orde ON record.order_id = orde.id
+		<where>
+            record.delete_flag = 0 and state = #{state}
+            <if test="main_condition != null and main_condition != ''">
+                and record.shop_id = #{main_condition}
+            </if>
+              <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by record.create_time desc limit #{start}, #{page_size}
+	</select>
+	
+	<select id="getRefundRecordCount" resultType="int">
+		select count(*)
+		from refund_record record 
+		LEFT JOIN shop_user_info info ON record.shop_id = info.id 
+		<where>
+            record.delete_flag = 0 and state = #{state}
+            <if test="main_condition != null and main_condition != ''">
+                and record.shop_id = #{main_condition}
+            </if>
+             <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	</select>
+</mapper>

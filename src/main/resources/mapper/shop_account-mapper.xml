@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.ShopAccountDao">
+	
+	<select id="getShopAccountByOrderId" resultType="shopAccount">
+		select * from shop_account where order_id = #{order_id} and delete_flag = 0
+	</select>
+	
+	<select id="getShopAccountCountByUserId" resultType="int">
+		select count(*) from shop_account where shop_id = #{shop_id} and delete_flag = 0
+	</select>
+	
+	<select id="getShopAccountListByCount" resultType="int">
+        select count(*)
+		from shop_account account
+		LEFT JOIN shop_user_info info ON account.shop_id = info.id
+		<where>
+            account.delete_flag = 0 
+            <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and account.shop_id=#{shop_id}
+            </if>
+            <if test="order_number != null and order_number != ''">
+                and account.order_number like concat('%',#{order_number},'%')
+            </if>
+            <if test="platform_order_number != null and platform_order_number != ''">
+                and account.platform_order_number = #{platform_order_number}
+            </if>
+            <if test="type != null and type != ''">
+                and account.type=#{type}
+            </if>
+             <if test="main_condition != null and main_condition != ''">
+                and account.shop_id=#{main_condition}
+            </if>
+            <if test="state == -1 or state == 0 or state == 1">
+                and account.state=#{state}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and account.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and account.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getShopAccountListByPage" resultType="shopAccount">
+        select *
+		from shop_account account
+		LEFT JOIN shop_user_info info ON account.shop_id = info.id
+		<where>
+            account.delete_flag = 0
+            <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="order_number != null and order_number != ''">
+                and account.order_number like concat('%',#{order_number},'%')
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and account.shop_id=#{shop_id}
+            </if>
+            <if test="platform_order_number != null and platform_order_number != ''">
+                and account.platform_order_number=#{platform_order_number}
+            </if>
+            <if test="type != null and type != ''">
+                and account.type=#{type}
+            </if>
+            <if test="main_condition != null and main_condition != ''">
+                and account.shop_id=#{main_condition}
+            </if>
+            <if test="state == -1 or state == 0 or state == 1">
+                and account.state=#{state}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and account.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and account.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+      order by account.create_time desc  limit #{start}, #{page_size}
+    </select>
+    
+    <select id="shopAccountStatisticeByShop" resultType="shopAccount">
+        select account.type , sum(account.actual_money) as actual_money, sum(account.order_money) as order_money
+		from shop_account account
+		LEFT JOIN shop_user_info info ON account.shop_id = info.id
+		<where>
+            account.delete_flag = 0 
+            <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_id != null and shop_id != ''">
+                and account.shop_id=#{shop_id}
+            </if>
+            <if test="order_number != null and order_number != ''">
+                and account.order_number like concat('%',#{order_number},'%')
+            </if>
+            <if test="platform_order_number != null and platform_order_number != ''">
+                and account.platform_order_number = #{platform_order_number}
+            </if>
+            <if test="type != null and type != ''">
+                and account.type=#{type}
+            </if>
+            <if test="state == -1 or state == 0 or state == 1">
+                and account.state=#{state}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and account.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and account.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+        group by account.type
+    </select>
+</mapper>

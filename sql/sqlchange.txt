@@ -1,0 +1,28 @@
+﻿新增表 recharge_bank_card
+新增表 admin_login_record
+新增表 agent_login_record
+新增表 agent_operation_record
+
+新增菜单项  	14	管理员登录日志	admin	/adminRecordWithAdminLogin
+新增菜单项  	14	代理商登录日志	admin	/adminRecordWithAgentLogin
+新增菜单项  	14	代理商操作日志	admin	/adminRecordWithAgentOperation
+新增菜单项  	5	柜台流水统计	admin	/counterStatisticsWithPayment
+新增菜单项
+新增菜单项
+新增菜单项
+新增菜单项
+
+
+配置文件新增
+auto_extraction.pinan.account_number=15000093921595
+auto_extraction.pinan.counter_number=Q000401305
+auto_extraction.pinan.short_number=P28523
+auto_extraction.pinan.account_key=12e9c862e0c14fb7b91e68930ec10bd4
+
+other.server.pinan_url=http://127.0.0.1:8091
+
+6/10
+新增表 google_authenticator
+shop_user_info 新增字段 google_auth_flag
+platform_admin_info 新增字段 google_auth_flag
+agent_info 新增字段 google_auth_flag

@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.SubPaymentInfoDao">
+
+    <select id="getSubPaymentInfoListByCount" resultType="int">
+    	select count(1)
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0
+            <if test="shop_name != null and shop_name != ''">
+                and sui.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+                and spi.sub_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and spi.sub_money &lt;= #{max_money}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getSubPaymentInfoList" resultType="SubPaymentInfo">
+		select spi.* ,sui.shop_name as shop_name,pi.passageway_name as passageway_name
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0
+            <if test="shop_name != null and shop_name != ''">
+                and sui.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+                and spi.sub_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and spi.sub_money &lt;= #{max_money}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+		order by spi.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    
+    <select id="getErrorSubPaymentInfo" resultType="SubPaymentInfo">
+		select sui.shop_name, spi.*, ifnull(count_table.cut,0) as platform_account_count, 
+			ifnull(roll_table.cut,0) as roll_back_count
+		from sub_payment_info spi
+		LEFT JOIN shop_user_info sui ON spi.shop_id = sui.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = spi.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=6 group by order_id ) count_table on count_table.order_id = spi.id
+		<where>
+			spi.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) > 1 and spi.state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and sui.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+		order by spi.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+     <select id="getErrorSubPaymentInfoCount" resultType="int">
+    	select count(1)
+		from sub_payment_info spi
+		LEFT JOIN shop_user_info sui ON spi.shop_id = sui.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = spi.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=6 group by order_id ) count_table on count_table.order_id = spi.id
+		<where>
+			spi.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) > 1 and spi.state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and sui.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+    </select>
+    
+    <select id="findSubPaymentInfoError" resultType="SubPaymentInfo">
+		select sui.shop_name, spi.*, ifnull(count_table.cut,0) as platform_account_count, 
+			ifnull(roll_table.cut,0) as roll_back_count
+		from sub_payment_info spi
+		LEFT JOIN shop_user_info sui ON spi.shop_id = sui.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = spi.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=6 group by order_id ) count_table on count_table.order_id = spi.id
+		<where>
+			spi.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) &lt; 1 and spi.state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and sui.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+		order by spi.create_time desc	limit #{start}, #{page_size}
+    </select>
+    
+     <select id="findSubPaymentInfoErrorCount" resultType="int">
+    	select count(1)
+		from sub_payment_info spi
+		LEFT JOIN shop_user_info sui ON spi.shop_id = sui.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=5 group by order_id ) roll_table on roll_table.order_id = spi.id 
+		LEFT JOIN (select count(1) as cut, order_id from platform_account where delete_flag = 0 and type=6 group by order_id ) count_table on count_table.order_id = spi.id
+		<where>
+			spi.delete_flag = 0 and (ifnull(count_table.cut,0) - ifnull(roll_table.cut,0)) &lt; 1 and spi.state = 1
+			<if test="shop_phone != null and shop_id != ''">
+                and sui.login_number like concat('%',#{shop_phone},'%')
+            </if>
+        </where>
+    </select>
+    
+    
+    
+    <select id="getSubPaymentListByShopCount" resultType="int">
+    	select count(1)
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0 and spi.shop_id = #{shop_id}
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getSubPaymentListByShop" resultType="SubPaymentInfo">
+		select spi.* ,sui.shop_name as shop_name,pi.passageway_name as passageway_name
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0 and spi.shop_id = #{shop_id}
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+		order by spi.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    
+    
+    <select id="getSubOrderListByAgentCount" resultType="int">
+    	select count(1)
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0
+	        <if test="shop_ids != null">
+                and spi.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and sui.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+                and spi.sub_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and spi.sub_money &lt;= #{max_money}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getSubOrderListByAgent" resultType="SubPaymentInfo">
+		select spi.* ,sui.shop_name as shop_name,pi.passageway_name as passageway_name
+		from sub_payment_info spi
+			 LEFT JOIN shop_user_info sui ON spi.shop_id =sui.id
+			 LEFT JOIN passageway_info pi ON spi.passageway_id =pi.id
+		<where>
+	        and spi.delete_flag = 0
+	        <if test="shop_ids != null">
+                and spi.shop_id in 
+				<foreach collection="shop_ids" item="id" index="index" open="(" close=")" separator=",">
+					  #{id}
+				</foreach>
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and sui.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+	        <if test="shop_sub_number != null and shop_sub_number != ''">
+	            and spi.shop_sub_number like concat('%',#{shop_sub_number},'%')
+	        </if>
+	        <if test="sub_payment_number != null and sub_payment_number != ''">
+	            and spi.sub_payment_number like concat('%',#{sub_payment_number},'%')
+	        </if>
+	        <if test="state != null and state != ''">
+	            and spi.state = #{state}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+                and spi.sub_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and spi.sub_money &lt;= #{max_money}
+	        </if>
+	        <if test="start_time != null and start_time != ''">
+                and spi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and spi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+		order by spi.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getSubPaymentByShopIdAndShopSubNumber" resultType="SubPaymentInfo">
+    	select * from sub_payment_info where delete_flag = 0 and shop_id = #{shop_id} and shop_sub_number = #{shop_sub_number}
+    </select>
+    
+    <select id="getSubPaymentBySubPaymentNumber" resultType="SubPaymentInfo">
+    	select * from sub_payment_info where delete_flag = 0 and sub_payment_number = #{sub_payment_number}
+    </select>
+</mapper>

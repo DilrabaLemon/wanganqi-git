@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.PlatformProfitDao">
+    
+    <select id="getDataStatisticsNumber" resultType="map">
+    	select data_statistics_number, count(1) as cot from `platform_profit_info` where delete_flag = 0 group by data_statistics_number;
+    </select>
+    
+    <select id="getDataByStatisticsNumber" resultType="PlatformProfitInfo">
+    	select * from `platform_profit_info` where delete_flag = 0 and data_statistics_number = #{data_statistics_number};
+    </select>
+    
+</mapper>

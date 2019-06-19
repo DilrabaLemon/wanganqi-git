@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>支付信息</title>
+
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0;">
+    <meta name="format-detection" content="telephone=no">
+    <style type="text/css">
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        h3{
+            margin: 0;
+            padding: 0;
+            font-size: 28px;
+            font-weight: normal;
+        }
+        p{
+            margin: 0;
+            padding: 0;
+            color: deepskyblue;
+        }
+        .main{
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .logo{
+            border-radius: 50%;
+            background: rgb(32, 144, 231);
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .logo span{
+            font-size: 20px;
+            color: #fff;
+            font-family: "Microsoft YaHei";
+        }
+        .title{
+            margin-top: 10px;
+        }
+        .title p{
+            color: rgb(32, 144, 231);
+        }
+        .desc{
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="logo">
+            <span>361Pay</span>
+        </div>
+        <div class="title">
+            <p id="state">付款成功</p>
+        </div>
+        <div class="desc">
+            <h3 id="payment">0.01元</h3>
+        </div>
+    </div>
+</body>
+
+</html>

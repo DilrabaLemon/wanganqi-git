@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.PassagewayCostDao">
+    
+    <select id="getPassagewayCostByCount" resultType="int">
+        select count(1)
+		from passageway_cost_info
+		<where>
+            delete_flag = 0 
+            <if test="type != null and type != ''">
+                and order_type=#{type}
+            </if>
+             <if test="platform_order_number != null and platform_order_number != ''">
+                and platform_order_number like concat('%',#{platform_order_number},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getPassagewayCostByPage" resultType="passagewayCostInfo">
+        select *
+		from passageway_cost_info
+		<where>
+            delete_flag = 0 
+            <if test="type != null and type != ''">
+                and order_type=#{type}
+            </if>
+             <if test="platform_order_number != null and platform_order_number != ''">
+                and platform_order_number like concat('%',#{platform_order_number},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+      order by create_time desc  limit #{start}, #{page_size}
+    </select>
+
+</mapper>

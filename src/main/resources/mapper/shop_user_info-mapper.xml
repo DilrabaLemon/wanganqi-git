@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.ShopUserDao">
+    <!-- 返回map结果集 -->
+    <resultMap id="DetailMap" type="shopInformationBean" extends="ListMap" />
+    <!-- 返回list结果集 -->
+    <resultMap id="ListMap" type="shopInformationBean" />
+    
+    <select id="getShopInformation" resultType="shopInformationBean">
+        select su.id,su.shop_name,su.shop_type,su.shop_category,su.user_name,su.login_number, su.open_key, su.return_site,su.password,sb.balance,su.bank_card_number,su.bank_name, su.examine, su.regist_bank, su.verification_flag 
+		from shop_user_info su 
+		left join shop_balance sb ON su.id = sb.shop_id 
+		WHERE su.id = #{shop_id} and su.delete_flag = 0
+    </select>
+    
+    <select id="getShopInformationByAgent" resultType="shopInformationBean">
+        select su.id,su.shop_name,su.shop_type,su.shop_category,su.user_name,su.login_number
+		from shop_user_info su left join shop_balance sb
+		ON su.id = sb.shop_id WHERE su.id = #{shop_id} and su.delete_flag = 0
+    </select>
+    
+    <select id="getShopInfoByAgent" resultType="shopUserInfo">
+        select * from shop_user_info 
+		WHERE agent_id = #{agent_id} and delete_flag = 0
+    </select>
+    
+    <select id="getShopInfoPage" resultType="shopUserInfo">
+        select * ,ai.agent_name as agent_name
+		from shop_user_info su 
+		left join shop_balance sb ON su.id = sb.shop_id
+		left join agent_info ai ON su.agent_id = ai.id
+		<where>
+            su.delete_flag = 0 
+            <if test="shop_name != null and shop_name != ''">
+                and su.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="middleman_remark != null and middleman_remark != ''">
+                and su.middleman_remark like concat('%',#{middleman_remark},'%')
+            </if>
+            <if test="shop_phone != null and shop_phone != ''">
+                and su.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="agent_id != null and agent_id != ''">
+                and su.agent_id =#{agent_id}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and su.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and su.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by su.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getShopInformationCount" resultType="int">
+        select count(*)
+		from shop_user_info su
+		left join agent_info ai ON su.agent_id = ai.id
+		<where>
+            su.delete_flag = 0
+            <if test="shop_name != null and shop_name != ''">
+                and su.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="middleman_remark != null and middleman_remark != ''">
+                and su.middleman_remark like concat('%',#{middleman_remark},'%')
+            </if>
+            <if test="shop_phone != null and shop_phone != ''">
+                and su.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="agent_id != null and agent_id != ''">
+                and su.agent_id =#{agent_id}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and su.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and su.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getShopInformationPageByAgent" resultType="shopInformationBean">
+        select su.id,su.shop_name,su.shop_type,su.shop_category,su.user_name,su.login_number
+		from shop_user_info su
+		<where>
+            su.delete_flag = 0 and su.agent_id = #{main_condition}
+            <if test="login_number != null and login_number != ''">
+                and su.login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and su.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="examine == 0||examine == 1||examine == 2 ">
+                 and su.examine=#{examine}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and su.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and su.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by su.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getShopInformationCountByAgent" resultType="int">
+        select count(*)
+		from shop_user_info
+		<where>
+            delete_flag = 0 and agent_id = #{main_condition}
+            <if test="login_number != null and login_number != ''">
+                and login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="examine == 0||examine == 1||examine == 2 ">
+               and examine=#{examine}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getShopUserByLoginNumber" resultType="shopUserInfo">
+        select *
+        from shop_user_info where delete_flag = 0 and login_number = #{login_number}
+    </select>
+    
+    <select id="getShopUserByOpenKey" resultType="shopUserInfo">
+        select *
+        from shop_user_info where delete_flag = 0 and login_number = #{login_number}
+    </select>
+    
+
+    <select id="shopUserLogin" resultType="shopUserInfo">
+        select *
+        from shop_user_info where delete_flag = 0 and login_number = #{login_number} and password = #{password}
+    </select>
+
+    <select id="findOpenKey">
+        select open_key from shop_user_info where id = #{shop_id} and delete_flag = 0
+    </select>
+
+    <select id="getTurnoverByCondition" resultType="double">
+        select
+        SUM(actual_money) 
+        from shop_account
+        where delete_flag = 0 
+        and shop_id = #{shop_id}
+        and create_time &gt; #{time}
+        and type=1
+        and state = 1
+    </select>
+    
+    <select id="getTurnover" resultType="double">
+        select
+        SUM(actual_money) 
+        from shop_account
+        where delete_flag = 0 
+        and shop_id = #{shop_id}
+        and type=1
+        and state = 1
+    </select>
+    
+    <select id="getTurnoverByLastMonth" resultType="double">
+        select
+        SUM(actual_money) 
+        from shop_account
+        where delete_flag = 0 
+        and shop_id = #{shop_id}
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and type=1
+        and state = 1
+    </select>
+    
+    <select id="getExtractionByLastMonth" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and shop_id = #{shop_id}
+        and state = 1
+    </select>
+    
+    <select id="getExtractionByCondition" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{time}
+        and shop_id = #{shop_id}
+        and state = 1
+    </select>
+    
+    <select id="getExtraction" resultType="double">
+        select
+        SUM(extraction_money) 
+        from extraction_record
+        where delete_flag = 0 
+        and shop_id = #{shop_id}
+        and state = 1
+    </select>
+    
+    <select id="getShopUserCountByAgentId" resultType="int">
+        select count(*)
+		from shop_user_info
+		WHERE agent_id = #{agent_id} and delete_flag = 0
+    </select>
+    
+    <select id="shopUserIDAndName" resultType="shopUserInfo">
+        select id,shop_name
+		from shop_user_info
+		WHERE delete_flag = 0
+    </select>
+    
+    <select id="shopUserListCount" resultType="ShopBalanceNew">
+        select sb.balance_type,
+        	   sum(sb.balance) as balance,
+        	   sum(sb.wait_money) as wait_money,
+        	   sum(sb.t0_money) as t0_money,
+        	   sum(sb.t1_money) as t1_money,
+        	   sum(sb.frozen_money) as frozen_money
+		from shop_balance_new sb 
+		left join shop_user_info su ON su.id = sb.shop_id
+		left join agent_info ai ON su.agent_id = ai.id
+		<where>
+            su.delete_flag = 0 
+            <if test="shop_name != null and shop_name != ''">
+                and su.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="middleman_remark != null and middleman_remark != ''">
+                and su.middleman_remark like concat('%',#{middleman_remark},'%')
+            </if>
+            <if test="shop_phone != null and shop_phone != ''">
+                and su.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="agent_id != null and agent_id != ''">
+                and su.agent_id =#{agent_id}
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and su.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and su.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	group by sb.balance_type 
+    </select>
+    
+    <select id="findAll" resultType="shopUserInfo">
+        select *
+		from shop_user_info
+		WHERE delete_flag = 0
+    </select>
+    
+    <select id="findPassagewayConfigNotUser" resultType="shopUserBo">
+        select su.id, su.shop_name, su.user_name 
+		from shop_user_info su 
+		left join (select * from passageway_config where passageway_id = #{passageway_id} and mapping_passageway_id = #{mapping_passageway_id} and delete_flag = 0) pc ON su.id = pc.shop_id 
+		WHERE pc.shop_id is null and su.delete_flag = 0
+    </select>
+</mapper>

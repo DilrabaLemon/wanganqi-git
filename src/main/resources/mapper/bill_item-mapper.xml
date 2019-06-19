@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.BillItemDao">
+    
+    <select id="getBillItemListByCount" resultType="int">
+        select count(*)
+		from bill_item
+		<where>
+            delete_flag = 0
+            <if test="trade_no != null and trade_no != ''">
+                and trade_no like concat('%',#{trade_no},'%')
+            </if>
+            <if test="info != null and info != ''">
+	            and info like concat('%',#{info},'%')
+	        </if>
+	        <if test="return_state != null and return_state != ''">
+	            and return_state = #{return_state}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getBillItemListByPage" resultType="billItem">
+        select *
+		from bill_item
+		<where>
+            delete_flag = 0
+            <if test="trade_no != null and trade_no != ''">
+                and trade_no like concat('%',#{trade_no},'%')
+            </if>
+            <if test="info != null and info != ''">
+	            and info like concat('%',#{info},'%')
+	        </if>
+	        <if test="return_state != null and return_state != ''">
+	            and return_state = #{return_state}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+    
+</mapper>

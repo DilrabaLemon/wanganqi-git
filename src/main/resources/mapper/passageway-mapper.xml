@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.PassagewayDao">
+    
+    <select id="getPassagewayByCode" resultType="passagewayInfo">
+        select * from passageway_info where passageway_code = #{passageway_code} and delete_flag=0
+    </select>
+	
+	<select id="getPassagewayListByCount" resultType="int">
+        select count(*)
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = #{type}
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getPassagewayListByPage" resultType="passageWayInfo">
+        select *
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = #{type}
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getPassagewayHasConfigListByCount" resultType="int">
+        select count(*)
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = #{type} and mapping_flag = 1
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getPassagewayHasConfigListByPage" resultType="passagewayHasConfigBo">
+        select pi.id, pi.passageway_code, pi.delete_flag, pi.update_time, pi.create_time,pi.passageway_name, pi.passageway_describe,
+        (select count(1) from passageway_config where delete_flag = 0 and passageway_id = pi.id) as mapping_passageway_count,
+        (select count(1) from passageway_config where delete_flag = 0 and passageway_id = pi.id and enable = 0) as mapping_passageway_count_enable,
+        (select count(1) from passageway_config where delete_flag = 0 and passageway_id = pi.id and enable = 1) as mapping_passageway_count_disuse
+		from passageway_info pi
+		<where>
+            pi.delete_flag = 0 and pi.passageway_type = 0 and mapping_flag = 1
+            <if test="passageway_code != null and passageway_code != ''">
+                and pi.passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and pi.passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and pi.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and pi.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by pi.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getPassagewayByShopIdAndProvideId" resultType="passagewayInfo">
+        select pi.* from shop_config sc
+		left join passageway_info pi on sc.passageway_id = pi.id
+		where sc.shop_id = #{shop_id} and pi.provide_id = #{passageway_id}
+    </select>
+    
+    <select id="findAllPassageway" resultType="passagewayInfo">
+        select * from passageway_info where passageway_type=0 and delete_flag=0
+    </select>
+    
+    <select id="getPassagewayByProvideId" resultType="passagewayInfo">
+        select * from passageway_info where  provide_id = #{provide_id}
+    </select>
+    
+    <select id="getPassagewayById" resultType="passagewayInfo">
+        select * from passageway_info where  id = #{passageway_id}
+    </select>
+    
+    <select id="getSubPaymentPassagewayListByCount" resultType="int">
+        select count(*)
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = 1
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getSubPaymentPassagewayListByPage" resultType="passageWayInfo">
+        select *
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = 1
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getEtrPaymentPassagewayListByCount" resultType="int">
+        select count(*)
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = 2
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getEtrPaymentPassagewayListByPage" resultType="passageWayInfo">
+        select *
+		from passageway_info
+		<where>
+            delete_flag = 0 and passageway_type = 2
+            <if test="passageway_code != null and passageway_code != ''">
+                and passageway_code like concat('%',#{passageway_code},'%')
+            </if>
+            <if test="passageway_name != null and passageway_name != ''">
+                and passageway_name like concat('%',#{passageway_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+     order by create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getAllByType" resultType="passageWayInfo">
+        select *
+		from passageway_info
+		<where>
+            delete_flag = 0
+            <if test="type != null">
+                and passageway_type = #{type}
+            </if>
+        </where>
+     order by create_time asc
+    </select>
+    
+    
+    <select id="findPassagewayListByCode" resultType="passageWayInfo">
+        select *
+		from passageway_info
+		where delete_flag = 0 and passageway_code like concat('%',#{passageway_code},'%')                                                           
+    </select>
+    
+    <select id="findPassagewayNotUserAndPassagewayId" resultType="passagewayInfo">
+		select * from passageway_info pi
+		left join (select * from passageway_config where passageway_id = #{passageway_id} and shop_id = #{shop_id} and delete_flag = 0) pc ON pc.mapping_passageway_id = pi.id
+		<where>
+            pi.delete_flag = 0 and pc.mapping_passageway_id is null and pi.passageway_type = #{type}
+        </where>
+    </select>
+</mapper>

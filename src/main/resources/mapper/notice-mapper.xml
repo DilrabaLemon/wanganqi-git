@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.NoticeDao">
+	<select id="getNoticeInfoListByPage" resultType="noticeInfo">
+		select *
+		from notice_info
+		<where>
+            delete_flag = 0
+            <if test="notice_title != null and notice_title != ''">
+                and notice_title like concat('%',#{notice_title},'%')
+            </if>
+            <if test="push_party != null and push_party != ''">
+                and push_party like concat('%',#{push_party},'%')
+            </if>
+             <if test="admin_name != null and admin_name != ''">
+                and admin_name like concat('%',#{admin_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by create_time desc limit #{start}, #{page_size}
+	</select>
+	
+	<select id="getNoticeInfoListByCount" resultType="int">
+		select count(*)
+		from notice_info
+		<where>
+            delete_flag = 0
+            <if test="notice_title != null and notice_title != ''">
+                and notice_title like concat('%',#{notice_title},'%')
+            </if>
+            <if test="push_party != null and push_party != ''">
+                and push_party like concat('%',#{push_party},'%')
+            </if>
+             <if test="admin_name != null and admin_name != ''">
+                and admin_name like concat('%',#{admin_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	</select>
+</mapper>

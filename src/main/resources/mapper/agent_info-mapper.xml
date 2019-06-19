@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.AgentDao">
+    <!-- 返回map结果集 -->
+    <resultMap id="DetailMap" type="agentInfo" extends="ListMap" />
+    <!-- 返回list结果集 -->
+    <resultMap id="ListMap" type="agentInfo" />
+
+    <select id="agentLogin" resultType="agentInfo">
+        select
+        *
+        from agent_info
+        where delete_flag = 0
+        and login_number = #{login_number}
+        and password = #{password}
+    </select>
+    
+    <select id="getAgentByLoginNumber" resultType="agentInfo">
+        select
+        *
+        from agent_info
+        where delete_flag = 0
+        and login_number = #{login_number}
+    </select>
+    
+    <select id="getTurnoverByCondition" resultType="double">
+        select
+        SUM(order_money) 
+        from agent_account
+        where delete_flag = 0 
+        and agent_id = #{agent_id}
+        and create_time &gt; #{time}
+        and type=1
+        and state=1
+    </select>
+    
+    <select id="getTurnover" resultType="double">
+        select
+        SUM(order_money) 
+        from agent_account
+        where delete_flag = 0 
+        and agent_id = #{agent_id}
+        and type=1
+        and state=1
+    </select>
+    
+    <select id="getTurnoverByLastMonth" resultType="double">
+        select
+        SUM(order_money) 
+        from agent_account
+        where delete_flag = 0 
+        and agent_id = #{agent_id}
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and type=1
+        and state=1
+    </select>
+    
+    <select id="getExtractionByLastMonth" resultType="double">
+        select
+        SUM(extraction_money) 
+        from agent_extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{last_month}
+        and create_time &lt; #{now_month}
+        and agent_id = #{agent_id}
+        and state=1
+    </select>
+    
+    <select id="getExtractionByCondition" resultType="double">
+        select
+        SUM(extraction_money) 
+        from agent_extraction_record
+        where delete_flag = 0 
+        and create_time &gt; #{time}
+        and agent_id = #{agent_id}
+        and state=1
+    </select>
+    
+    <select id="getExtraction" resultType="double">
+        select
+        SUM(extraction_money) 
+        from agent_extraction_record
+        where delete_flag = 0 
+        and agent_id = #{agent_id}
+        and state=1
+    </select>
+    
+    <select id="getAgentListByCount" resultType="int">
+        select count(*)
+		from agent_info
+		<where>
+            delete_flag = 0
+            <if test="login_number != null and login_number != ''">
+                and login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="agent_name != null and agent_name != ''">
+                and agent_name like concat('%',#{agent_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+    
+    <select id="getAgentListByPage" resultType="agentInfo">
+        select *
+		from agent_info info
+		LEFT JOIN agent_balance balance on info.id=balance.agent_id
+		<where>
+            info.delete_flag = 0
+            <if test="login_number != null and login_number != ''">
+                and info.login_number like concat('%',#{login_number},'%')
+            </if>
+            <if test="agent_name != null and agent_name != ''">
+                and info.agent_name like concat('%',#{agent_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and info.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and info.create_time &lt;= #{end_time}
+	        </if>
+        </where>
+       order by info.create_time desc limit #{start}, #{page_size}
+    </select>
+    
+    <select id="getAgentIdAndNameList" resultType="agentInfo">
+        select id,agent_name
+        from agent_info
+        where delete_flag = 0 
+    </select>
+
+</mapper>

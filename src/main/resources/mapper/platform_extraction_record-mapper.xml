@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boye.dao.PlatformExtractionRecordDao">
+
+ 	
+    
+    <select id="extractionListByAdminCount" resultType="int">
+        select count(*)
+		from platform_extraction_record
+		<where>
+            delete_flag = 0
+            <if test="state == 0 || state == 1 || state == 2 || state == 3 ">
+                and state =#{state}
+            </if>
+            <if test="min_money != null and min_money != ''">
+                and extraction_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and extraction_money &lt;= #{max_money}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+    </select>
+	
+	<select id="extractionListByAdminPage" resultType="PlatformExtractionRecord">
+        select *
+		from platform_extraction_record
+		<where>
+            delete_flag = 0 and state = #{state}
+            <if test="min_money != null and min_money != ''">
+                and extraction_money &gt;= #{min_money}
+            </if>
+            <if test="max_money != null and max_money != ''">
+	            and extraction_money &lt;= #{max_money}
+	        </if>
+            <if test="start_time != null and start_time != ''">
+                and create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and create_time &lt;= #{end_time}
+	        </if>
+        </where>
+	order by create_time desc limit #{start}, #{page_size}
+    </select>
+</mapper>

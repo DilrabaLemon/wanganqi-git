@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.boye.dao.ExtractionDao">
+
+    <select id="getExtractionByNumber" resultType="ExtractionRecord">
+        select * from extraction_record  where extraction_number = #{extraction_number} and delete_flag = 0
+    </select>
+    
+    <select id="getExtractionRecord" resultType="extractionRecord">
+		select info.shop_name as shop_name, record.*
+		from extraction_record record 
+		LEFT JOIN shop_user_info info ON record.shop_id = info.id 
+		<where>
+            record.delete_flag = 0 and state = #{state}
+            <if test="main_condition != null and main_condition != ''">
+                and record.shop_id = #{main_condition}
+            </if>
+             <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+            <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="max_money != null and max_money != ''">
+	            and record.extraction_money &lt;= #{max_money}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+	            and record.extraction_money &gt;= #{min_money}
+	        </if>
+        </where>
+	order by record.create_time desc limit #{start}, #{page_size}
+	</select>
+	
+	<select id="getExtractionRecordCount"  resultType="int">
+		select count(*)
+		from extraction_record record 
+		LEFT JOIN shop_user_info info ON record.shop_id = info.id 
+		<where>
+            record.delete_flag = 0 and state = #{state}
+            <if test="main_condition != null and main_condition != ''">
+                and record.shop_id = #{main_condition}
+            </if>
+            <if test="shop_phone != null and shop_phone != ''">
+                and info.login_number like concat('%',#{shop_phone},'%')
+            </if>
+             <if test="shop_name != null and shop_name != ''">
+                and info.shop_name like concat('%',#{shop_name},'%')
+            </if>
+            <if test="start_time != null and start_time != ''">
+                and record.create_time &gt;= #{start_time}
+            </if>
+            <if test="end_time != null and end_time != ''">
+	            and record.create_time &lt;= #{end_time}
+	        </if>
+	        <if test="max_money != null and max_money != ''">
+	            and record.extraction_money &lt;= #{max_money}
+	        </if>
+	        <if test="min_money != null and min_money != ''">
+	            and record.extraction_money &gt;= #{min_money}
+	        </if>
+        </where>
+	</select>
+	
+	<select id="getExtractionCountByUserId" resultType="int">
+        select count(*) from extraction_record  where shop_id = #{shop_id} and delete_flag = 0
+    </select>
+</mapper>
